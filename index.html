@@ -203,14 +203,6 @@ const palette={
 "R":"#e96b9d"
 };
 const sprite=document.getElementById("sprite");
-spriteRows.forEach(row=>{
-  [...row].forEach(ch=>{
-    const cell=document.createElement("div");
-    cell.className="pixel";
-    cell.style.background=palette[ch]||"transparent";
-    sprite.appendChild(cell);
-  });
-});
 
 // ストーリーの分岐
 const story={
