@@ -1,0 +1,218 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ドキドキ！？RENAIシミュレーション</title>
+<style>
+body {
+  background: #24203d;
+  color: white;
+  text-align: center;
+  font-family: monospace;
+  padding: 20px;
+}
+.game {
+  max-width: 600px;
+  margin: auto;
+  background: #393052;
+  border: 5px solid #ffacd9;
+  padding: 20px;
+}
+h1 { color: #ffacd9; }
+button {
+  display: block;
+  width: 100%;
+  padding: 15px;
+  margin: 10px 0;
+  background: #f5a1ce;
+  border: 3px solid white;
+  font-size: 16px;
+  cursor: pointer;
+}
+.character {
+  background: #50436a;
+  padding: 12px;
+  margin: 12px 0;
+}
+.avatar { font-size: 50px; }
+.hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="game">
+
+<div id="title">
+<h1>💗 ドキドキ！？<br>RENAIシミュレーション</h1>
+<p>～君との青春ストーリー～</p>
+<div class="avatar">🌸 🏫 🌸</div>
+<p>4人とのドキドキな学校生活！</p>
+<button onclick="showCharacters()">GAME START！</button>
+</div>
+
+<div id="select" class="hidden">
+<h2>相手を選ぼう！</h2>
+<div id="characterList"></div>
+</div>
+
+<div id="story" class="hidden">
+<h2 id="chapter"></h2>
+<div class="avatar" id="face"></div>
+<h2 id="person"></h2>
+<p>💗 好感度：<span id="love">0</span></p>
+<p id="dialogue"></p>
+<div id="choices"></div>
+</div>
+
+<div id="ending" class="hidden">
+<h1 id="endingTitle"></h1>
+<p id="endingText"></p>
+<button onclick="location.reload()">もう一度遊ぶ</button>
+</div>
+
+</div>
+
+<script>
+const characters = [
+{name:"朝比奈 蓮",type:"クール系",face:"🧑🏻‍🎓"},
+{name:"星野 陽翔",type:"元気系",face:"🧑🏼‍🎓"},
+{name:"桜井 美咲",type:"おっとり系",face:"👩🏻‍🎓"},
+{name:"藤宮 凛",type:"知的系",face:"👩🏻‍🏫"}
+];
+
+let selected = 0;
+let chapterIndex = 0;
+let love = 0;
+
+const chapters = [
+{
+title:"第1話 入学式",
+dialogue:[
+"「あ、新入生？よろしく。」",
+"「おっ！同じクラスだね！」",
+"「あの……隣の席、いいかな？」",
+"「あなた、面白そうな人ね。」"
+],
+choices:["よろしく！","ありがとう！","こちらこそ！","ぜひ仲良くしてね！"]
+},
+{
+title:"第2話 昼休み",
+dialogue:[
+"「一緒にお昼を食べない？」",
+"「購買に行こうぜ！」",
+"「よかったら一緒に食べよう？」",
+"「ここ、空いてるわよ。」"
+],
+choices:["もちろん！","楽しそう！","うれしいな！","ぜひ！"]
+},
+{
+title:"第3話 放課後",
+dialogue:[
+"「今日は一緒に帰らないか？」",
+"「寄り道しようぜ！」",
+"「一緒に帰れたら嬉しいな。」",
+"「少し話していかない？」"
+],
+choices:["一緒に帰ろう！","いいね！","ありがとう！","もちろん！"]
+},
+{
+title:"第4話 文化祭",
+dialogue:[
+"「文化祭、一緒に回ろう。」",
+"「今日は思い切り楽しもうぜ！」",
+"「一緒に準備できて嬉しいな。」",
+"「あなたと回るのも悪くないわね。」"
+],
+choices:["楽しみ！","写真を撮ろう！","一緒に頑張ろう！","最高の思い出にしよう！"]
+}
+];
+
+function showCharacters() {
+document.getElementById("title").classList.add("hidden");
+document.getElementById("select").classList.remove("hidden");
+
+const list = document.getElementById("characterList");
+
+characters.forEach((c,i)=>{
+const div = document.createElement("div");
+div.className="character";
+div.innerHTML =
+`<div class="avatar">${c.face}</div>
+<h3>${c.name}</h3><p>${c.type}</p>`;
+
+const button=document.createElement("button");
+button.textContent="この人を選ぶ！";
+button.onclick=()=>startGame(i);
+
+div.appendChild(button);
+list.appendChild(div);
+});
+}
+
+function startGame(i) {
+selected=i;
+chapterIndex=0;
+love=0;
+document.getElementById("select").classList.add("hidden");
+document.getElementById("story").classList.remove("hidden");
+showChapter();
+}
+
+function showChapter() {
+const c=characters[selected];
+const ch=chapters[chapterIndex];
+
+document.getElementById("chapter").textContent=ch.title;
+document.getElementById("face").textContent=c.face;
+document.getElementById("person").textContent=c.name;
+document.getElementById("love").textContent=love;
+document.getElementById("dialogue").textContent=ch.dialogue[selected];
+
+const choices=document.getElementById("choices");
+choices.innerHTML="";
+
+ch.choices.forEach((option,i)=>{
+const button=document.createElement("button");
+button.textContent="▶ "+option;
+button.onclick=()=>choose(i);
+choices.appendChild(button);
+});
+}
+
+function choose(i) {
+love += [3,2,1,0][i];
+chapterIndex++;
+
+if(chapterIndex>=chapters.length) {
+showEnding();
+} else {
+showChapter();
+}
+}
+
+function showEnding() {
+document.getElementById("story").classList.add("hidden");
+document.getElementById("ending").classList.remove("hidden");
+
+const c=characters[selected];
+
+let title,text;
+
+if(love>=10) {
+title="💗 ハッピーエンド！";
+text=c.name+"「これからも一緒に思い出を作ろうね！」";
+} else if(love>=5) {
+title="💙 友達エンド！";
+text=c.name+"「これからも仲良くしてね！」";
+} else {
+title="🌸 青春エンド！";
+text="まだまだこれから！また挑戦してね！";
+}
+
+document.getElementById("endingTitle").textContent=title;
+document.getElementById("endingText").textContent=text;
+}
+</script>
+</body>
+</html>
