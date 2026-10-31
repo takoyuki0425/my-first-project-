@@ -3,216 +3,427 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ドキドキ！？RENAIシミュレーション</title>
 <style>
-body {
-  background: #24203d;
-  color: white;
-  text-align: center;
-  font-family: monospace;
-  padding: 20px;
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:#211c3c;
+  color:#fff;
+  font-family:"Courier New",monospace;
+  padding:18px;
 }
-.game {
-  max-width: 600px;
-  margin: auto;
-  background: #393052;
-  border: 5px solid #ffacd9;
-  padding: 20px;
+.game{
+  max-width:850px;
+  margin:auto;
+  border:5px solid #f48ac5;
+  border-radius:12px;
+  background:#37305d;
+  padding:16px;
+  box-shadow:0 0 25px #ed80c5;
 }
-h1 { color: #ffacd9; }
-button {
-  display: block;
-  width: 100%;
-  padding: 15px;
-  margin: 10px 0;
-  background: #f5a1ce;
-  border: 3px solid white;
-  font-size: 16px;
-  cursor: pointer;
+h1{
+  color:#ffb4dd;
+  text-align:center;
+  font-size:clamp(21px,5vw,34px);
+  text-shadow:3px 3px #713c80;
 }
-.character {
-  background: #50436a;
-  padding: 12px;
-  margin: 12px 0;
+.status{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+  background:#211c3c;
+  border:2px solid #f48ac5;
+  padding:12px;
+  border-radius:8px;
 }
-.avatar { font-size: 50px; }
-.hidden { display: none; }
+.meter{
+  height:14px;
+  background:#171329;
+  border:2px solid #ffacd9;
+  border-radius:10px;
+  overflow:hidden;
+  margin-top:6px;
+}
+#bar{
+  height:100%;
+  width:50%;
+  background:linear-gradient(90deg,#ed4e9f,#ffb0d8);
+  transition:width .3s;
+}
+.scene{
+  background:linear-gradient(#a6c7e9,#e8b8d5);
+  min-height:270px;
+  border:3px solid #ffacd9;
+  border-radius:8px;
+  margin-top:14px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:14px;
+  position:relative;
+  overflow:hidden;
+}
+.sun{
+  font-size:30px;
+  position:absolute;
+  top:12px;
+  right:20px;
+}
+.sprite{
+  display:grid;
+  grid-template-columns:repeat(9, min(7vw,25px));
+  grid-template-rows:repeat(12,min(7vw,25px));
+  image-rendering:pixelated;
+  filter:drop-shadow(3px 4px 1px #59446b);
+}
+.pixel{width:100%;height:100%}
+.name{
+  color:#ffb1dc;
+  font-size:20px;
+  font-weight:bold;
+  margin-top:8px;
+  text-shadow:2px 2px #673c77;
+}
+.dialog{
+  background:#fff0f8;
+  color:#35213d;
+  border:4px solid #ef83c3;
+  border-radius:10px;
+  padding:18px;
+  margin-top:14px;
+  min-height:120px;
+  line-height:1.8;
+  font-size:16px;
+}
+#choices{
+  display:grid;
+  gap:10px;
+  margin-top:14px;
+}
+button{
+  cursor:pointer;
+  background:#fff0f8;
+  color:#46264c;
+  border:3px solid #ed8ac4;
+  border-radius:9px;
+  padding:13px;
+  font-size:15px;
+  font-weight:bold;
+  text-align:left;
+  font-family:inherit;
+  transition:.15s;
+}
+button:hover{
+  background:#ffc5e5;
+  transform:translateY(-2px);
+}
+button:focus-visible{outline:3px solid white}
+.small{
+  text-align:center;
+  color:#d8c9ed;
+  font-size:12px;
+  margin-top:15px;
+}
+#result{text-align:center;padding:20px}
+.hidden{display:none}
 </style>
 </head>
 <body>
 <div class="game">
+<h1>♡ ドキドキ！？RENAIシミュレーション ♡</h1>
 
-<div id="title">
-<h1>💗 ドキドキ！？<br>RENAIシミュレーション</h1>
-<p>～君との青春ストーリー～</p>
-<div class="avatar">🌸 🏫 🌸</div>
-<p>4人とのドキドキな学校生活！</p>
-<button onclick="showCharacters()">GAME START！</button>
+<div class="status">
+  <div>
+    <div>💗 桃子の好感度：<span id="score">0</span></div>
+    <div class="meter"><div id="bar"></div></div>
+  </div>
+  <div>📖 <span id="chapter">第1章</span></div>
 </div>
 
-<div id="select" class="hidden">
-<h2>相手を選ぼう！</h2>
-<div id="characterList"></div>
+<div id="play">
+  <div class="scene">
+    <div class="sun">☀️</div>
+    <div class="sprite" id="sprite"></div>
+    <div class="name">桜井 桃子</div>
+  </div>
+  <div class="dialog">
+    <strong id="speaker">桃子</strong><br>
+    <span id="message"></span>
+  </div>
+  <div id="choices"></div>
 </div>
 
-<div id="story" class="hidden">
-<h2 id="chapter"></h2>
-<div class="avatar" id="face"></div>
-<h2 id="person"></h2>
-<p>💗 好感度：<span id="love">0</span></p>
-<p id="dialogue"></p>
-<div id="choices"></div>
+<div id="result" class="hidden">
+  <h2 id="ending"></h2>
+  <p id="endingText"></p>
+  <p>最終好感度：<strong id="finalScore"></strong></p>
+  <button onclick="restart()">もう一度プレイする ♡</button>
 </div>
-
-<div id="ending" class="hidden">
-<h1 id="endingTitle"></h1>
-<p id="endingText"></p>
-<button onclick="location.reload()">もう一度遊ぶ</button>
-</div>
-
+<div class="small">© ドキドキ！？RENAIシミュレーション</div>
 </div>
 
 <script>
-const characters = [
-{name:"朝比奈 蓮",type:"クール系",face:"🧑🏻‍🎓"},
-{name:"星野 陽翔",type:"元気系",face:"🧑🏼‍🎓"},
-{name:"桜井 美咲",type:"おっとり系",face:"👩🏻‍🎓"},
-{name:"藤宮 凛",type:"知的系",face:"👩🏻‍🏫"}
+// 桃子のドット絵
+const spriteRows=[
+"....HHH..",
+"...HHHHH.",
+"..HHHHHHH",
+"..HSSSSSH",
+"..HESES H",
+"..HSSSSSH",
+"...SSSS..",
+"..BBBBB..",
+".BBBBBBB.",
+".BBRBRBB.",
+".BBRBRBB.",
+"..BBBBB.."
 ];
-
-let selected = 0;
-let chapterIndex = 0;
-let love = 0;
-
-const chapters = [
-{
-title:"第1話 入学式",
-dialogue:[
-"「あ、新入生？よろしく。」",
-"「おっ！同じクラスだね！」",
-"「あの……隣の席、いいかな？」",
-"「あなた、面白そうな人ね。」"
-],
-choices:["よろしく！","ありがとう！","こちらこそ！","ぜひ仲良くしてね！"]
-},
-{
-title:"第2話 昼休み",
-dialogue:[
-"「一緒にお昼を食べない？」",
-"「購買に行こうぜ！」",
-"「よかったら一緒に食べよう？」",
-"「ここ、空いてるわよ。」"
-],
-choices:["もちろん！","楽しそう！","うれしいな！","ぜひ！"]
-},
-{
-title:"第3話 放課後",
-dialogue:[
-"「今日は一緒に帰らないか？」",
-"「寄り道しようぜ！」",
-"「一緒に帰れたら嬉しいな。」",
-"「少し話していかない？」"
-],
-choices:["一緒に帰ろう！","いいね！","ありがとう！","もちろん！"]
-},
-{
-title:"第4話 文化祭",
-dialogue:[
-"「文化祭、一緒に回ろう。」",
-"「今日は思い切り楽しもうぜ！」",
-"「一緒に準備できて嬉しいな。」",
-"「あなたと回るのも悪くないわね。」"
-],
-choices:["楽しみ！","写真を撮ろう！","一緒に頑張ろう！","最高の思い出にしよう！"]
-}
-];
-
-function showCharacters() {
-document.getElementById("title").classList.add("hidden");
-document.getElementById("select").classList.remove("hidden");
-
-const list = document.getElementById("characterList");
-
-characters.forEach((c,i)=>{
-const div = document.createElement("div");
-div.className="character";
-div.innerHTML =
-`<div class="avatar">${c.face}</div>
-<h3>${c.name}</h3><p>${c.type}</p>`;
-
-const button=document.createElement("button");
-button.textContent="この人を選ぶ！";
-button.onclick=()=>startGame(i);
-
-div.appendChild(button);
-list.appendChild(div);
+const palette={
+"H":"#543044",
+"S":"#ffd2b4",
+"E":"#56304c",
+"B":"#394a83",
+"R":"#e96b9d"
+};
+const sprite=document.getElementById("sprite");
+spriteRows.forEach(row=>{
+  [...row].forEach(ch=>{
+    const cell=document.createElement("div");
+    cell.className="pixel";
+    cell.style.background=palette[ch]||"transparent";
+    sprite.appendChild(cell);
+  });
 });
+
+// ストーリーの分岐
+const story={
+start:{
+ chapter:"入学式",
+ text:"あっ！もしかして同じクラス？ 私、桜井桃子！よろしくね！",
+ choices:[
+  ["笑顔で自己紹介する",3,"meet"],
+  ["緊張して小さく挨拶する",1,"shy"],
+  ["冗談を言ってみる",2,"joke"],
+  ["そっけなく返事をする",-3,"cold"]
+ ]
+},
+meet:{
+ chapter:"入学式",
+ text:"えへへ、話しやすい人でよかった！これからよろしくね！",
+ choices:[
+  ["一緒に教室へ行こうと誘う",3,"classroom"],
+  ["好きなことを聞く",2,"hobby"],
+  ["また後でね、と別れる",0,"separate"]
+ ]
+},
+shy:{
+ chapter:"入学式",
+ text:"ふふ、緊張してる？ 私も少し緊張してるんだ。",
+ choices:[
+  ["実は自分も緊張していると話す",3,"classroom"],
+  ["桃子なら大丈夫だよと励ます",2,"hobby"],
+  ["何も言わずに歩く",-1,"separate"]
+ ]
+},
+joke:{
+ chapter:"入学式",
+ text:"あはは！面白いね！なんだか楽しくなってきた！",
+ choices:[
+  ["もっと話してみる",3,"classroom"],
+  ["桃子の趣味を聞く",2,"hobby"],
+  ["冗談を言いすぎる",-2,"separate"]
+ ]
+},
+cold:{
+ chapter:"入学式",
+ text:"そ、そっか……。これから仲良くなれたらいいな。",
+ choices:[
+  ["さっきはごめんねと謝る",2,"classroom"],
+  ["改めて自己紹介する",1,"hobby"],
+  ["そのまま立ち去る",-2,"separate"]
+ ]
+},
+classroom:{
+ chapter:"教室",
+ text:"同じクラスだね！隣の席だったらいいのにな。",
+ choices:[
+  ["隣の席になれるといいね！",3,"lunch"],
+  ["席が離れても話そうね",2,"lunch"],
+  ["席はどこでもいいかな",-2,"lunch"]
+ ]
+},
+hobby:{
+ chapter:"教室",
+ text:"私、絵を描いたり音楽を聴いたりするのが好きなんだ！",
+ choices:[
+  ["どんな絵を描くの？",3,"lunch"],
+  ["おすすめの音楽を教えて",2,"lunch"],
+  ["あまり興味ないかな",-2,"lunch"]
+ ]
+},
+separate:{
+ chapter:"教室",
+ text:"あっ、もう授業が始まるね。また後で話そうね！",
+ choices:[
+  ["昼休みに話そうと約束する",2,"lunch"],
+  ["笑顔で手を振る",1,"lunch"],
+  ["何も言わずに席につく",-1,"lunch"]
+ ]
+},
+lunch:{
+ chapter:"昼休み",
+ text:"ねえ、お昼一緒に食べない？今日はお弁当を作ってきたんだ！",
+ choices:[
+  ["ぜひ一緒に食べよう！",3,"lunchGood"],
+  ["お弁当おいしそうだね！",2,"lunchGood"],
+  ["今日は一人で食べたいな",-2,"lunchQuiet"]
+ ]
+},
+lunchGood:{
+ chapter:"昼休み",
+ text:"やった！実は少し話したかったんだ。好きな食べ物は何？",
+ choices:[
+  ["桃子の好きな食べ物を聞く",3,"rain"],
+  ["お弁当のおかずを褒める",2,"rain"],
+  ["別の友達の話ばかりする",-2,"rain"]
+ ]
+},
+lunchQuiet:{
+ chapter:"昼休み",
+ text:"そっか！また今度一緒に食べようね。無理しないでね！",
+ choices:[
+  ["ありがとう、また誘ってね",2,"rain"],
+  ["少しだけなら一緒に食べよう",1,"rain"],
+  ["返事をせずに離れる",-2,"rain"]
+ ]
+},
+rain:{
+ chapter:"放課後",
+ text:"あれ？雨が降ってきちゃった。傘、持ってくるの忘れちゃった……。",
+ choices:[
+  ["傘に一緒に入る？と誘う",3,"umbrella"],
+  ["傘を貸してあげる",2,"borrow"],
+  ["また明日ねと帰る",0,"festival"]
+ ]
+},
+umbrella:{
+ chapter:"放課後",
+ text:"いいの？ありがとう！一緒に帰れるなんてうれしいな。",
+ choices:[
+  ["桃子の歩く速さに合わせる",3,"secret"],
+  ["楽しい話をしながら帰る",2,"secret"],
+  ["急いで帰ろうとする",-2,"secret"]
+ ]
+},
+borrow:{
+ chapter:"放課後",
+ text:"えっ、傘を貸してくれるの？ありがとう！優しいね。",
+ choices:[
+  ["風邪をひかないようにね",3,"secret"],
+  ["明日返してくれれば大丈夫",1,"secret"],
+  ["早く返してね",-2,"secret"]
+ ]
+},
+festival:{
+ chapter:"文化祭",
+ text:"もうすぐ文化祭だね！私たちのクラスは喫茶店をするんだって！",
+ choices:[
+  ["一緒に準備しよう！",3,"cafe"],
+  ["桃子の手伝いをするよ",2,"cafe"],
+  ["面倒だなあ",-2,"cafe"]
+ ]
+},
+secret:{
+ chapter:"帰り道",
+ text:"今日はありがとう。実はね、君ともっと仲良くなりたいなって思ってたんだ。",
+ choices:[
+  ["自分も同じ気持ちだよ",4,"festival"],
+  ["これからもっと話そう",2,"festival"],
+  ["そうなんだ、と話題を変える",-2,"festival"]
+ ]
+},
+cafe:{
+ chapter:"文化祭",
+ text:"文化祭、大成功だったね！ねえ、最後に一緒に校内を回らない？",
+ choices:[
+  ["もちろん！一緒に回ろう",3,"sunset"],
+  ["桃子が行きたいところに行こう",3,"sunset"],
+  ["友達と約束があるんだ",-2,"sunset"]
+ ]
+},
+sunset:{
+ chapter:"夕暮れ",
+ text:"夕日がきれいだね。君と過ごした時間、私にとって大切な思い出だよ。",
+ choices:[
+  ["これからも一緒に思い出を作ろう",4,"ending"],
+  ["また明日も会おうね",2,"ending"],
+  ["急に照れて黙ってしまう",1,"ending"]
+ ]
 }
+};
 
-function startGame(i) {
-selected=i;
-chapterIndex=0;
-love=0;
-document.getElementById("select").classList.add("hidden");
-document.getElementById("story").classList.remove("hidden");
-showChapter();
+let score=0;
+let flags={};
+let current="start";
+
+function show(){
+ const scene=story[current];
+ if(!scene){finish();return;}
+ document.getElementById("chapter").textContent=scene.chapter;
+ document.getElementById("message").textContent=scene.text;
+ document.getElementById("score").textContent=score;
+ document.getElementById("bar").style.width=Math.max(0,Math.min(100,score*2+50))+"%";
+ const choices=document.getElementById("choices");
+ choices.innerHTML="";
+ scene.choices.forEach(choice=>{
+  const btn=document.createElement("button");
+  btn.textContent="▶ "+choice[0];
+  btn.onclick=()=>select(choice);
+  choices.appendChild(btn);
+ });
 }
-
-function showChapter() {
-const c=characters[selected];
-const ch=chapters[chapterIndex];
-
-document.getElementById("chapter").textContent=ch.title;
-document.getElementById("face").textContent=c.face;
-document.getElementById("person").textContent=c.name;
-document.getElementById("love").textContent=love;
-document.getElementById("dialogue").textContent=ch.dialogue[selected];
-
-const choices=document.getElementById("choices");
-choices.innerHTML="";
-
-ch.choices.forEach((option,i)=>{
-const button=document.createElement("button");
-button.textContent="▶ "+option;
-button.onclick=()=>choose(i);
-choices.appendChild(button);
-});
+function select(choice){
+ score+=choice[1];
+ flags[choice[2]]=(flags[choice[2]]||0)+1;
+ current=choice[2];
+ if(current==="ending"){finish();return;}
+ show();
 }
-
-function choose(i) {
-love += [3,2,1,0][i];
-chapterIndex++;
-
-if(chapterIndex>=chapters.length) {
-showEnding();
-} else {
-showChapter();
+function finish(){
+ document.getElementById("play").classList.add("hidden");
+ document.getElementById("result").classList.remove("hidden");
+ document.getElementById("finalScore").textContent=score;
+ let title,description;
+ if(score>=25 && flags.secret){
+  title="💗 真実のハッピーエンド 💗";
+  description="桃子は満面の笑顔で言った。「これからも、ずっと仲良くしてね！」二人の新しい物語が始まる。";
+ }else if(score>=18){
+  title="🌸 ハッピーエンド 🌸";
+  description="桃子とたくさんの思い出を作れたね。二人の距離はぐっと近づいた！";
+ }else if(score>=8){
+  title="🌷 友達エンド 🌷";
+  description="二人は大切な友達になった。これからも楽しい毎日が続きそう！";
+ }else if(score>=0){
+  title="🌙 青春エンド 🌙";
+  description="まだお互いのことをよく知らない二人。また新しい出会いが待っているかも。";
+ }else{
+  title="🍂 すれ違いエンド 🍂";
+  description="少しずつ気持ちがすれ違ってしまった。次は違う選択をしてみよう。";
+ }
+ document.getElementById("ending").textContent=title;
+ document.getElementById("endingText").textContent=description;
 }
+function restart(){
+ score=0;flags={};current="start";
+ document.getElementById("play").classList.remove("hidden");
+ document.getElementById("result").classList.add("hidden");
+ show();
 }
-
-function showEnding() {
-document.getElementById("story").classList.add("hidden");
-document.getElementById("ending").classList.remove("hidden");
-
-const c=characters[selected];
-
-let title,text;
-
-if(love>=10) {
-title="💗 ハッピーエンド！";
-text=c.name+"「これからも一緒に思い出を作ろうね！」";
-} else if(love>=5) {
-title="💙 友達エンド！";
-text=c.name+"「これからも仲良くしてね！」";
-} else {
-title="🌸 青春エンド！";
-text="まだまだこれから！また挑戦してね！";
-}
-
-document.getElementById("endingTitle").textContent=title;
-document.getElementById("endingText").textContent=text;
-}
+show();
 </script>
 </body>
 </html>
