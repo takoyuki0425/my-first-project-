@@ -384,7 +384,7 @@ function show(){
  document.getElementById("bar").style.width=Math.max(0,Math.min(100,score*2+50))+"%";
  const choices=document.getElementById("choices");
  choices.innerHTML="";
- scene.choices.forEach(choice=>{
+ [...scene.choices].sort(()=>Math.random()-0.5).forEach(choice=>{
   const btn=document.createElement("button");
   btn.textContent="▶ "+choice[0];
   btn.onclick=()=>select(choice);
