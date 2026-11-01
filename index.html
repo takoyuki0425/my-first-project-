@@ -431,7 +431,8 @@ if(score>=20){
  specialMessage="あはは……これから仲良くなれるといいね";
 } if(!scene){finish();return;}
  document.getElementById("chapter").textContent=scene.chapter;
-document.getElementById("message").textContent=specialMessage+" "+scene.text;
+document.getElementById("specialMessage").textContent=specialMessage;
+document.getElementById("message").textContent=scene.text;
  document.getElementById("score").textContent=score;
  document.getElementById("bar").style.width=Math.max(0,Math.min(100,score*2+50))+"%";
  const choices=document.getElementById("choices");
